@@ -2,6 +2,7 @@ package schneider.tictactoe.userservice.model;
 
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -10,6 +11,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "games")
 @Data
+@Builder
 @NoArgsConstructor
 public class Game {
 

@@ -3,13 +3,17 @@ package schneider.tictactoe.userservice.service.impl;
 import com.nimbusds.openid.connect.sdk.AuthenticationResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.jms.core.JmsTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestMapping;
 import schneider.tictactoe.userservice.dto.AuthLoginDto;
 import schneider.tictactoe.userservice.dto.AuthenticationResponseDto;
+import schneider.tictactoe.userservice.dto.TransferDto;
 import schneider.tictactoe.userservice.dto.UserCreateDto;
+import schneider.tictactoe.userservice.listener.MessageHelper;
 import schneider.tictactoe.userservice.mapper.UserMapper;
 import schneider.tictactoe.userservice.model.Role;
 import schneider.tictactoe.userservice.model.Token;
@@ -22,6 +26,7 @@ import schneider.tictactoe.userservice.service.JwtService;
 import schneider.tictactoe.userservice.service.UserService;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.Optional;
 
 @Service
@@ -34,7 +39,11 @@ public class UserServiceImpl implements UserService {
     private final VerifyTokenRepository verifyTokenRepository;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
+    private final JmsTemplate jmsTemplate;
+    @Value("${destination.sendEmails}")
+    private String sendEmailDestination;
     private final TokenRepository tokenRepository;
+    private final MessageHelper messageHelper;;
 
     @Override
     public User findUsername(String username) {
@@ -55,7 +64,14 @@ public class UserServiceImpl implements UserService {
         verifyToken.generateVerifyToken();
         verifyTokenRepository.save(verifyToken);
         System.out.printf(verifyToken.getVerifyToken());
-// TODO: SEND EMAIL
+
+        HashMap<String, String> paramsMap = new HashMap<>();
+        paramsMap.put("%username%", user.getUsername());
+        paramsMap.put("%link%", "http://localhost:9090/api/user/verify/" + verifyToken.getVerifyToken());
+        TransferDto transferDto = new TransferDto(user.getEmail(), "REGISTER_USER", paramsMap, user.getUsername());
+
+        jmsTemplate.convertAndSend(sendEmailDestination, messageHelper.createTextMessage(transferDto));
+
 
     }
 
@@ -96,6 +112,12 @@ public class UserServiceImpl implements UserService {
         authenticationResponseDto.setAccessToken(jwtToken);
         authenticationResponseDto.setRefreshToken(refreshToken);
         saveUserToken(user, refreshToken);
+
+        HashMap<String, String> paramsMap = new HashMap<>();
+        paramsMap.put("%username%", user.getUsername());
+        TransferDto transferDto = new TransferDto(user.getEmail(), "LOGIN_USER", paramsMap, user.getUsername());
+
+        jmsTemplate.convertAndSend(sendEmailDestination, messageHelper.createTextMessage(transferDto));
 
 //        mail for login
 

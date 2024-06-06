@@ -1,5 +1,5 @@
 import ILogin from "@/model/ILogin";
-import { API_GET_MYSELF_USER, API_SIGN_IN_USER, API_SIGN_UP_USER } from "../constants";
+import { API_GET_LEADERBOARD, API_GET_MYSELF_USER, API_SIGN_IN_USER, API_SIGN_UP_USER } from "../constants";
 import IRegister from "@/model/IRegister";
 
 export const sendLoginRequestUser = async (payload : ILogin) => {
@@ -20,6 +20,13 @@ export const sendRegisterRequestUser = async (payload : IRegister) => {
 
 export const sendGetMyselfUser = (token: string) =>
     fetch(API_GET_MYSELF_USER, {
+        method: 'GET',
+        headers: {'Accept': 'application/json', 'Content-Type': 'application/json', "Authorization": "Bearer " + token},
+});
+
+
+export const getLeaderboard = (token: string) =>
+    fetch(API_GET_LEADERBOARD, {
         method: 'GET',
         headers: {'Accept': 'application/json', 'Content-Type': 'application/json', "Authorization": "Bearer " + token},
 });

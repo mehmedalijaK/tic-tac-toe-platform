@@ -20,8 +20,6 @@ const Links = () => {
 
     }, [authenticated])
 
-    const isAdmin = false
-    const isManager = false
 
     return (
         <div className={styles.links}>
@@ -30,7 +28,7 @@ const Links = () => {
             )))}{
                 authenticated ? (
                     <>
-                        <NavbarLink item={{title: "My profile", path: "/my-profile"}}/>
+                        <NavbarLink item={{title: "Leaderboard", path: "/leaderboard"}}/>
                         <NavbarLink item={{title: "Logout", path: "/logout"}}/>
                     </>
                 ) : (

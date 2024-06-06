@@ -1,5 +1,6 @@
 export default interface IUser {
     Id: number,
     username: string,
-    email: string
+    email: string,
+    score: number
 }

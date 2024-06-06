@@ -10,4 +10,5 @@ public class UserDto {
     private Long Id;
     private String username;
     private String email;
+    private int score;
 }

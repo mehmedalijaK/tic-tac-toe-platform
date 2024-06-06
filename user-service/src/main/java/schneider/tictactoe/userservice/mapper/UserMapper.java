@@ -30,6 +30,7 @@ public class UserMapper {
         userDto.setId(user.getId());
         userDto.setEmail(user.getEmail());
         userDto.setUsername(user.getUsername());
+        userDto.setScore(user.getScore());
         return userDto;
     }
 }

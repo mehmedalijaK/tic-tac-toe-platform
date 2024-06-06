@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import schneider.tictactoe.userservice.dto.AuthLoginDto;
 import schneider.tictactoe.userservice.dto.AuthenticationResponseDto;
 import schneider.tictactoe.userservice.dto.UserCreateDto;
+import schneider.tictactoe.userservice.dto.UserDto;
 import schneider.tictactoe.userservice.service.UserService;
 
 @RestController
@@ -34,6 +35,11 @@ public class UserController {
     @PostMapping("/login")
     public ResponseEntity<AuthenticationResponseDto> authenticate(@RequestBody @Valid AuthLoginDto authLoginDto){
         return new ResponseEntity<>(userService.authenticate(authLoginDto), HttpStatus.OK);
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<UserDto> me(@RequestHeader("Authorization") String authorization){
+        return new ResponseEntity<>(userService.getMe(authorization), HttpStatus.OK);
     }
 
 }

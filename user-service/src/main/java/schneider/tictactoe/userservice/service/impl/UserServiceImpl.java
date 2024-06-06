@@ -4,15 +4,13 @@ import com.nimbusds.openid.connect.sdk.AuthenticationResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestMapping;
-import schneider.tictactoe.userservice.dto.AuthLoginDto;
-import schneider.tictactoe.userservice.dto.AuthenticationResponseDto;
-import schneider.tictactoe.userservice.dto.TransferDto;
-import schneider.tictactoe.userservice.dto.UserCreateDto;
+import schneider.tictactoe.userservice.dto.*;
 import schneider.tictactoe.userservice.listener.MessageHelper;
 import schneider.tictactoe.userservice.mapper.UserMapper;
 import schneider.tictactoe.userservice.model.Role;
@@ -122,6 +120,14 @@ public class UserServiceImpl implements UserService {
 //        mail for login
 
         return authenticationResponseDto;
+    }
+
+    @Override
+    public UserDto getMe(String authorization) {
+        String token = authorization.substring(7);
+        Optional<User> user = userRepository.findByUsername(jwtService.extractUsername(token));
+        if(user.isEmpty()) return null;
+        return userMapper.userToUserDto(user.get());
     }
 
     private void revokeAllUserTokens(User user) { // TODO: transfer to JWT class

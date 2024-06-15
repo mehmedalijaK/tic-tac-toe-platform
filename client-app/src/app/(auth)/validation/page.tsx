@@ -31,7 +31,7 @@ const ValidationPage = () => {
         <CssBaseline />
 
         {/* Hero unit */}
-        <Container disableGutters maxWidth="md" component="main" sx={{ pt: 30, pb: 6 }}>
+        <Container disableGutters maxWidth="md" component="main" sx={{ pt: 3, pb: 6 }}>
           <Typography
             component="h1"
             variant="h2"

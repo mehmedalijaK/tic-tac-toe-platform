@@ -1,5 +1,6 @@
 "use client"
-import React, { useState, useEffect } from 'react';
+import AuthContext from '@/context/AuthContext';
+import React, { useState, useEffect, useContext } from 'react';
 import io, { Socket } from 'socket.io-client';
 
 const NewGamePage: React.FC = () => {
@@ -10,7 +11,10 @@ const NewGamePage: React.FC = () => {
     const [status, setStatus] = useState<string>("Create or join a room to start playing");
     const [socket, setSocket] = useState<Socket | null>(null);
     const [winner, setWinner] = useState<string | null>(null);
-    const [serverOnline, setServerOnline] = useState<boolean>(true);
+    const [serverOnline, setServerOnline] = useState<boolean>(false);
+    const [playerInfo, setPlayerInfo] = useState<{ username: string, score: number } | null>(null);
+    const [opponentInfo, setOpponentInfo] = useState<{ username: string, score: number } | null>(null);
+    const {user} = useContext(AuthContext);
 
     useEffect(() => {
         const newSocket = io('http://localhost:4000');
@@ -30,11 +34,16 @@ const NewGamePage: React.FC = () => {
 
         newSocket.on('opponentLeftRoom', () => {
             setStatus('Opponent has disconnected. Game ended.');
-            handleLeaveRoom()
+            console.log("Opponent left the room");
+            handleLeaveRoom();
         });
 
-        newSocket.on('startGame', () => {
+        newSocket.on('startGame', (players) => {
             setStatus("Game started! Next player: X");
+            const currentPlayer = players.find(p => p.id === newSocket.id);
+            const opponent = players.find(p => p.id !== newSocket.id);
+            setPlayerInfo(currentPlayer);
+            setOpponentInfo(opponent);
         });
 
         newSocket.on('moveMade', (data) => {
@@ -43,21 +52,43 @@ const NewGamePage: React.FC = () => {
             setStatus(data.status);
         });
 
+        newSocket.on('createError', (message: string) => {
+            setStatus(message);
+            setRoomId(null);
+            setPlayer(null);
+        });
+
+        newSocket.on('joinError', (message: string) => {
+            setStatus(message);
+            setRoomId(null);
+            setPlayer(null);
+        });
+
+        newSocket.on('gameFinished', ({ winner, loser }) => {
+            console.log(`Game finished! Winner: ${winner}, Loser: ${loser}`);
+
+            // Update user scores or perform other actions based on game result
+           
+        });
+
         return () => {
-            if (socket) {
-                socket.disconnect();
+            if (newSocket) {
+                newSocket.disconnect();
             }
         };
     }, []);
+
 
     const createRoom = () => {
         if (!serverOnline) return;
 
         const newRoomId = prompt("Enter room ID to create:");
-        if (newRoomId && socket) {
+        const username = user?.username
+        if (newRoomId && username && socket) {
             setRoomId(newRoomId);
             setPlayer("X");
-            socket.emit("createRoom", newRoomId);
+            setPlayerInfo({ username, score: 0 });
+            socket.emit("createRoom", { roomId: newRoomId, username, score: 0 });
             setStatus("Room created! Waiting for another player to join...");
         }
     };
@@ -66,10 +97,12 @@ const NewGamePage: React.FC = () => {
         if (!serverOnline) return;
 
         const joinRoomId = prompt("Enter room ID to join:");
-        if (joinRoomId && socket) {
+        const username = user?.username
+        if (joinRoomId && username && socket) {
             setRoomId(joinRoomId);
             setPlayer("O");
-            socket.emit("joinRoom", joinRoomId);
+            setPlayerInfo({ username, score: 0 });
+            socket.emit("joinRoom", { roomId: joinRoomId, username, score: 0 });
             setStatus("Joined room! Waiting for the first move...");
         }
     };
@@ -91,7 +124,9 @@ const NewGamePage: React.FC = () => {
     };
 
     const handleLeaveRoom = () => {
+        console.log('leave room');
         if (roomId && socket) {
+            console.log('leave room');
             socket.emit('leaveRoom', roomId); // Emit leaveRoom event to notify server
             setRoomId(null);
             setPlayer(null);
@@ -99,6 +134,8 @@ const NewGamePage: React.FC = () => {
             setIsXNext(true);
             setStatus("Create or join a room to start playing");
             setWinner(null);
+            setPlayerInfo(null);
+            setOpponentInfo(null);
         }
     };
 
@@ -160,6 +197,12 @@ const NewGamePage: React.FC = () => {
     return (
         <>
             <div className="status mb-4 text-2xl font-bold">{status}</div>
+            {playerInfo && opponentInfo && (
+                <div className="players mb-4 text-xl font-semibold">
+                    <div>Player: {playerInfo.username} (Score: {playerInfo.score})</div>
+                    <div>Opponent: {opponentInfo.username} (Score: {opponentInfo.score})</div>
+                </div>
+            )}
             <div className="board flex flex-col items-center space-y-2">
                 <div className="board-row flex space-x-2">
                     {renderSquare(0)}

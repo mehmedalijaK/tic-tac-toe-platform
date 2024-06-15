@@ -81,7 +81,7 @@ const RegisterUserPage = () => {
         <CssBaseline />
         <Box
           sx={{
-            marginTop: 25,
+            marginTop: 0,
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',

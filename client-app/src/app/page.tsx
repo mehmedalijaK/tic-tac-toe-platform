@@ -40,7 +40,7 @@ export default function Home() {
             Tic Tac Toe
           </Typography>
           <Typography variant="h5" align="center" color="text.secondary" paragraph>
-            This Tic Tac Toe project, created for my internship application to Schneider Electric.
+            This is Tic Tac Toe project, created for my internship in Schneider Electric.
           </Typography>
           <Stack
             sx={{ pt: 4 }}

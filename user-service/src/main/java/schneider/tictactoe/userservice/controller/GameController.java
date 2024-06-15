@@ -21,8 +21,9 @@ public class GameController {
     private final GameService gameService;
 
     @PostMapping("/create")
-    public ResponseEntity<CreateGameDto> createGame(@RequestHeader("Authorization") String authorization){
-        return new ResponseEntity<>(gameService.createGame(), HttpStatus.OK);
+    public ResponseEntity<String> createGame(@RequestBody @Valid CreateGameDto createGameDto) {
+        gameService.createGame(createGameDto);
+        return new ResponseEntity<>("Game created successfully", HttpStatus.OK);
     }
 
     @GetMapping("/leaderboard")

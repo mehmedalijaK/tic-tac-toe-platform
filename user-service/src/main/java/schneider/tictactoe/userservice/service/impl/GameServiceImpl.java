@@ -27,17 +27,24 @@ public class GameServiceImpl implements GameService {
     private final UserRepository userRepository;
 
     @Override
-    public CreateGameDto createGame() {
-        Game game = Game.builder()
-                .date(LocalDateTime.now())
-                .duration(0)
-                .user(null)
-                .build();
-
-        Game savedGame = gameRepository.save(game);
-        Long savedGameId = savedGame.getId();
-
-        return CreateGameDto.builder().id(savedGameId).build();
+    public CreateGameDto createGame(CreateGameDto createGameDto) {
+        Optional<User> userWinner = userRepository.findByUsername(createGameDto.getUsernameWinner());
+        Optional<User> userLoser = userRepository.findByUsername(createGameDto.getUsernameLoser());
+        if (userWinner.isPresent() && userLoser.isPresent()) {
+            Game game = Game.builder()
+                    .date(LocalDateTime.now())
+                    .winner(userWinner.get())
+                    .loser(userLoser.get())
+                    .build();
+            gameRepository.save(game);
+            userWinner.get().setScore(userWinner.get().getScore() + 5);
+            userLoser.get().setScore(Math.max( userLoser.get().getScore() - 5, 0));
+            userRepository.save(userWinner.get());
+            userRepository.save(userLoser.get());
+            return null;
+        } else {
+            throw new RuntimeException("Winner or loser not found");
+        }
     }
 
     @Override

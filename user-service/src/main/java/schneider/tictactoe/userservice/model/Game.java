@@ -1,6 +1,5 @@
 package schneider.tictactoe.userservice.model;
 
-
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Data;
@@ -22,17 +21,18 @@ public class Game {
     @Column(name = "date", nullable = false)
     private LocalDateTime date;
 
-    @Column(name = "duration", nullable = false)
-    private int duration = 0;
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "winner_id")
+    private User winner;
 
-    @ManyToOne(optional = true)
-    @JoinColumn(name = "user_id")
-    private User user;
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "loser_id")
+    private User loser;
 
-    public Game(Long id, LocalDateTime date, int duration, User user) {
+    public Game(Long id, LocalDateTime date, User winner, User loser) {
         this.id = id;
         this.date = date;
-        this.duration = duration;
-        this.user = user;
+        this.winner = winner;
+        this.loser = loser;
     }
 }

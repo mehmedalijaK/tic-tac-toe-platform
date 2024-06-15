@@ -84,11 +84,12 @@ const NewGamePage: React.FC = () => {
 
         const newRoomId = prompt("Enter room ID to create:");
         const username = user?.username
+        const score = user?.score
         if (newRoomId && username && socket) {
             setRoomId(newRoomId);
             setPlayer("X");
-            setPlayerInfo({ username, score: 0 });
-            socket.emit("createRoom", { roomId: newRoomId, username, score: 0 });
+            setPlayerInfo({ username, score: score || 0});
+            socket.emit("createRoom", { roomId: newRoomId, username, score });
             setStatus("Room created! Waiting for another player to join...");
         }
     };
@@ -98,11 +99,12 @@ const NewGamePage: React.FC = () => {
 
         const joinRoomId = prompt("Enter room ID to join:");
         const username = user?.username
+        const score = user?.score
         if (joinRoomId && username && socket) {
             setRoomId(joinRoomId);
             setPlayer("O");
-            setPlayerInfo({ username, score: 0 });
-            socket.emit("joinRoom", { roomId: joinRoomId, username, score: 0 });
+            setPlayerInfo({ username, score: score || 0 });
+            socket.emit("joinRoom", { roomId: joinRoomId, username, score });
             setStatus("Joined room! Waiting for the first move...");
         }
     };

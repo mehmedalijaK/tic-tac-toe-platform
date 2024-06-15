@@ -15,7 +15,7 @@ io.on('connection', (socket) => {
 
     socket.on('createRoom', ({ roomId, username, score }) => {
         if (!rooms[roomId]) {
-            rooms[roomId] = { players: [{ id: socket.id, username, score }] };
+            rooms[roomId] = { players: [{ id: socket.id, username, score, symbol: 'X' }] };
             socket.join(roomId);
             console.log(`Room ${roomId} created by ${username}`);
         } else {
@@ -27,7 +27,8 @@ io.on('connection', (socket) => {
         const room = rooms[roomId];
         if (room) {
             if (room.players.length < 2) {
-                room.players.push({ id: socket.id, username, score });
+                const symbol = room.players[0].symbol === 'X' ? 'O' : 'X';
+                room.players.push({ id: socket.id, username, score, symbol });
                 socket.join(roomId);
                 console.log(`${username} joined Room ${roomId}`);
 
@@ -45,20 +46,21 @@ io.on('connection', (socket) => {
         socket.to(roomId).emit('moveMade', { board, isXNext, status });
 
         // Check for game end
-        const winner = calculateWinner(board);
-        if (winner) {
+        const winnerSymbol = calculateWinner(board);
+        if (winnerSymbol) {
             const players = rooms[roomId].players;
-            const loser = players.find(player => player.username !== winner.username);
+            const winner = players.find(player => player.symbol === winnerSymbol);
+            const loser = players.find(player => player.symbol !== winnerSymbol);
 
-            // Create a CreateGameDto instance
             const gameResultDto = {
                 usernameWinner: winner.username,
                 usernameLoser: loser.username,
-                localDateTime: new Date() // Adjust as per your requirement
+                localDateTime: new Date().toISOString()
             };
+            
+            console.log(gameResultDto);
 
-            // Send game result to backend
-            axios.post('http://your-spring-boot-backend-url/api/game-result', gameResultDto)
+            axios.post('http://localhost:9090/api/game/create', gameResultDto)
                 .then(response => {
                     console.log('Game result sent to backend:', response.data);
                 })

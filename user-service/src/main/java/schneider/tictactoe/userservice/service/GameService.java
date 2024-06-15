@@ -7,7 +7,7 @@ import schneider.tictactoe.userservice.dto.UserRankDto;
 import java.util.List;
 
 public interface GameService {
-    CreateGameDto createGame();
+    CreateGameDto createGame(CreateGameDto createGameDto);
 
     List<UserRankDto> getLeaderboard();
 }

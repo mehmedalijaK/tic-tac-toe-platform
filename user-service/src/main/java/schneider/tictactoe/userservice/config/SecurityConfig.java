@@ -26,6 +26,7 @@ public class SecurityConfig {
             "/api/user/login",
             "/api/user/register",
             "/api/user/verify/{id}",
+            "/api/game/create"
     };
 
     @Bean

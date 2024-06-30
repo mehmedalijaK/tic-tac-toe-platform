@@ -6,10 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import schneider.tictactoe.userservice.dto.AuthLoginDto;
-import schneider.tictactoe.userservice.dto.AuthenticationResponseDto;
-import schneider.tictactoe.userservice.dto.UserCreateDto;
-import schneider.tictactoe.userservice.dto.UserDto;
+import schneider.tictactoe.userservice.dto.*;
 import schneider.tictactoe.userservice.service.UserService;
 
 @RestController
@@ -40,6 +37,12 @@ public class UserController {
     @GetMapping("/me")
     public ResponseEntity<UserDto> me(@RequestHeader("Authorization") String authorization){
         return new ResponseEntity<>(userService.getMe(authorization), HttpStatus.OK);
+    }
+
+    @GetMapping("/my-games")
+    public ResponseEntity<GamesHistoryDto> myGames(@RequestHeader("Authorization") String authorization) throws Exception{
+        GamesHistoryDto gamesHistory = userService.getMyGames(authorization);
+        return ResponseEntity.ok(gamesHistory);
     }
 
 }

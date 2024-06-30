@@ -15,6 +15,7 @@ const NewGamePage: React.FC = () => {
     const [playerInfo, setPlayerInfo] = useState<{ username: string, score: number } | null>(null);
     const [opponentInfo, setOpponentInfo] = useState<{ username: string, score: number } | null>(null);
     const {user} = useContext(AuthContext);
+    const [score, setScore] = useState<number | undefined>(user?.score)
 
     useEffect(() => {
         const newSocket = io('http://localhost:4000');
@@ -66,6 +67,8 @@ const NewGamePage: React.FC = () => {
 
         newSocket.on('gameFinished', ({ winner, loser }) => {
             console.log(`Game finished! Winner: ${winner}, Loser: ${loser}`);
+            console.log(winner)
+            console.log(user?.username)
 
             // Update user scores or perform other actions based on game result
            
@@ -84,7 +87,7 @@ const NewGamePage: React.FC = () => {
 
         const newRoomId = prompt("Enter room ID to create:");
         const username = user?.username
-        const score = user?.score
+        // const score = user?.score
         if (newRoomId && username && socket) {
             setRoomId(newRoomId);
             setPlayer("X");
@@ -99,7 +102,7 @@ const NewGamePage: React.FC = () => {
 
         const joinRoomId = prompt("Enter room ID to join:");
         const username = user?.username
-        const score = user?.score
+        // const score = user?.score
         if (joinRoomId && username && socket) {
             setRoomId(joinRoomId);
             setPlayer("O");

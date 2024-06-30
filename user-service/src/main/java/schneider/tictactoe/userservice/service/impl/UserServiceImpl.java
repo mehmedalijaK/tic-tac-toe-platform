@@ -3,6 +3,7 @@ package schneider.tictactoe.userservice.service.impl;
 import com.nimbusds.openid.connect.sdk.AuthenticationResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.jms.core.JmsTemplate;
@@ -12,11 +13,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestMapping;
 import schneider.tictactoe.userservice.dto.*;
 import schneider.tictactoe.userservice.listener.MessageHelper;
+import schneider.tictactoe.userservice.mapper.GameMapper;
 import schneider.tictactoe.userservice.mapper.UserMapper;
-import schneider.tictactoe.userservice.model.Role;
-import schneider.tictactoe.userservice.model.Token;
+import schneider.tictactoe.userservice.model.*;
 import schneider.tictactoe.userservice.model.User;
-import schneider.tictactoe.userservice.model.VerifyToken;
+import schneider.tictactoe.userservice.repository.GameRepository;
 import schneider.tictactoe.userservice.repository.TokenRepository;
 import schneider.tictactoe.userservice.repository.UserRepository;
 import schneider.tictactoe.userservice.repository.VerifyTokenRepository;
@@ -24,8 +25,11 @@ import schneider.tictactoe.userservice.service.JwtService;
 import schneider.tictactoe.userservice.service.UserService;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -41,7 +45,9 @@ public class UserServiceImpl implements UserService {
     @Value("${destination.sendEmails}")
     private String sendEmailDestination;
     private final TokenRepository tokenRepository;
-    private final MessageHelper messageHelper;;
+    private final MessageHelper messageHelper;
+    private final GameRepository gameRepository;
+    private final GameMapper gameMapper;
 
     @Override
     public User findUsername(String username) {
@@ -128,6 +134,30 @@ public class UserServiceImpl implements UserService {
         Optional<User> user = userRepository.findByUsername(jwtService.extractUsername(token));
         if(user.isEmpty()) return null;
         return userMapper.userToUserDto(user.get());
+    }
+
+    @Override
+    public GamesHistoryDto getMyGames(String authorization) throws Exception {
+        String token = authorization.substring(7);
+        Optional<User> user = userRepository.findByUsername(jwtService.extractUsername(token));
+        if (user.isEmpty())
+            throw new Exception("User not found");
+
+        Long userId = user.get().getId();
+        Optional<List<Game>> games = gameRepository.findGameByUserId(userId);
+
+        if (games.isEmpty())
+            return new GamesHistoryDto();
+
+        List<Game> myGames = games.get();
+
+        List<GameDto> gameDtos = myGames.stream()
+                .map(gameMapper::toGameDto)
+                .toList();
+
+        GamesHistoryDto gamesHistoryDto = new GamesHistoryDto();
+        gamesHistoryDto.setMyGames(gameDtos);
+        return gamesHistoryDto;
     }
 
     private void revokeAllUserTokens(User user) { // TODO: transfer to JWT class

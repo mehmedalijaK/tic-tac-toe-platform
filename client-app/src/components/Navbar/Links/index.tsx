@@ -4,6 +4,7 @@ import styles from "./links.module.css"
 import NavbarLink from "./NavbarLink"
 import { useContext, useEffect } from "react"
 import { AuthContext } from "@/context/AuthContext"
+import { time } from "console"
 
 const Links = () => {
 
@@ -29,6 +30,8 @@ const Links = () => {
                 authenticated ? (
                     <>
                         <NavbarLink item={{title: "Leaderboard", path: "/leaderboard"}}/>
+                        <NavbarLink item={{title: "Online matchmaking", path: "/new-game"}}/>
+                        <NavbarLink item={{title: "Offline matchmaking", path: "/singleplayer"}}/>
                         <NavbarLink item={{title: "Logout", path: "/logout"}}/>
                     </>
                 ) : (

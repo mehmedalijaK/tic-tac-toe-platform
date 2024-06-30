@@ -55,7 +55,6 @@ public class GameServiceImpl implements GameService {
                 .map(Optional::get)
                 .map(this::convertToDto)
                 .collect(Collectors.toList()));
-
     }
 
     private UserRankDto convertToDto(User user) {
